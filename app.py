@@ -1,13 +1,19 @@
 import requests
+from fastapi import FastAPI
+
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request
 
 import json
 # import pandas
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/web-scrapper', methods=["GET"])
+@app.get("/", include_in_schema=False)
+def index():
+    return("/")
+
+@app.get("/web-scrapper")
 def webScrapper():
     data = json.loads(request.data)
 
