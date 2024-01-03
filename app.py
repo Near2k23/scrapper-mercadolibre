@@ -1,11 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 import json
 # import pandas
 
 app = Flask(__name__)
+CORS(app)
 
 # GET Request
 @app.route('/web-scrapper', methods=["GET"])
@@ -76,7 +78,7 @@ def webScrapperSearch():
         product = data.get("product")
         limit = data.get("limit", 10)
 
-        response = requests.get("http://localhost:5000/web-scrapper", data=json.dumps({"product": product, "limit": int(limit)}), headers={"Content-Type": "application/json"})
+        response = requests.get("https://web-scrapper-production.up.railway.app/web-scrapper", data=json.dumps({"product": product, "limit": int(limit)}), headers={"Content-Type": "application/json"})
         print(response.status_code)
 
         if response.status_code == 200:
