@@ -2,4 +2,4 @@ requests
 bs4
 pandas
 flask
-gunicorn
+uvicorn
