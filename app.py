@@ -73,5 +73,5 @@ def webScrapper():
 
     return jsonify({"data":{"Titles": titles, "Prices": prices , "URLs": urls }, "average_price": average_price_rounded})
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", debug=True)
