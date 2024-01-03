@@ -7,6 +7,7 @@ import json
 
 app = Flask(__name__)
 
+# GET Request
 @app.route('/web-scrapper', methods=["GET"])
 def webScrapper():
     data = json.loads(request.data)
@@ -66,6 +67,25 @@ def webScrapper():
         print("An error has ocurred, please try again later.")
 
     return jsonify({"data":{"Titles": titles, "Prices": prices , "URLs": urls }, "average_price": average_price_rounded})
+
+# POST Request
+@app.route('/search', methods=["GET", "POST"])
+def webScrapperSearch():
+    if request.method == "POST":
+        data = request.json
+        product = data.get("product")
+        limit = data.get("limit", 10)
+
+        response = requests.get("http://localhost:5000/web-scrapper", data=json.dumps({"product": product, "limit": int(limit)}), headers={"Content-Type": "application/json"})
+        print(response.status_code)
+
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify(data)
+        else:
+            return "An error has occurred, please try again later."
+
+    return "This endpoint only accepts POST requests."
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=False)
