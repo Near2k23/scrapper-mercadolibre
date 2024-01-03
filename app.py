@@ -1,19 +1,13 @@
 import requests
-from fastapi import FastAPI
-
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request
 
 import json
 # import pandas
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/", include_in_schema=False)
-def index():
-    return("/")
-
-@app.get("/web-scrapper")
+@app.route('/web-scrapper', methods=["GET"])
 def webScrapper():
     data = json.loads(request.data)
 
@@ -73,5 +67,5 @@ def webScrapper():
 
     return jsonify({"data":{"Titles": titles, "Prices": prices , "URLs": urls }, "average_price": average_price_rounded})
 
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=False)
