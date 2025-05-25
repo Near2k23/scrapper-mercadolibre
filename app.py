@@ -136,6 +136,53 @@ def extract_price(soup):
     
     return price_data
 
+def extract_variations(soup):
+    """Extrae las variaciones del producto (colores, tamaños, etc.)"""
+    variations = {
+        "colors": []
+    }
+    
+    variations_container = soup.find('div', class_='ui-pdp-variations')
+    if variations_container:
+        # Buscar todas las variaciones (thumbnails)
+        thumbnails = variations_container.find_all('a', class_='ui-pdp-thumbnail')
+        for thumbnail in thumbnails:
+            # Extraer información de cada variación
+            img = thumbnail.find('img', class_='ui-pdp-image')
+            img_url = None
+            
+            if img:
+                # Primero intentar obtener la URL 2x del srcset
+                srcset = img.get('srcset', '')
+                if srcset:
+                    urls = srcset.split(',')
+                    for url in urls:
+                        if '2x' in url and '.webp' in url:
+                            img_url = url.strip().split(' ')[0]
+                            break
+                
+                # Si no se encontró en srcset, intentar con data-zoom
+                if not img_url:
+                    img_url = img.get('data-zoom')
+                
+                # Si aún no hay URL, intentar con src
+                if not img_url:
+                    img_url = img.get('src')
+                
+                # Asegurarse de que la URL no sea base64 o gif
+                if img_url and (img_url.startswith('data:') or img_url.endswith('.gif')):
+                    img_url = None
+            
+            variation = {
+                "name": img.get('alt') if img else None,
+                "url": thumbnail.get('href') if thumbnail else None,
+                "image": img_url,
+                "selected": 'ui-pdp-thumbnail--SELECTED' in thumbnail.get('class', [])
+            }
+            variations["colors"].append(variation)
+    
+    return variations if variations["colors"] else None
+
 def extract_specifications(soup):
     """Extrae las especificaciones técnicas del producto"""
     specs = {}
@@ -220,6 +267,7 @@ def webScrapper():
             images = []
             descriptions = []
             specifications = []
+            variations = []
 
             # Si es una página de listado
             if 'listado.mercadolibre.com.co' in url:
@@ -252,6 +300,7 @@ def webScrapper():
                         images.append(image_url)
                         descriptions.append(None)
                         specifications.append(None)
+                        variations.append(None)
             
             # Si es una página de producto individual
             else:
@@ -277,8 +326,9 @@ def webScrapper():
                 if desc_elem:
                     description = clean_text(desc_elem.text.strip())
                 
-                # Extraer especificaciones
+                # Extraer especificaciones y variaciones
                 specs = extract_specifications(soup)
+                product_variations = extract_variations(soup)
                 
                 if title:
                     titles.append(clean_text(title.text))
@@ -287,6 +337,7 @@ def webScrapper():
                     images.append(gallery_images if gallery_images else None)
                     descriptions.append(description)
                     specifications.append(specs)
+                    variations.append(product_variations)
 
             if not titles:
                 return Response(
@@ -305,7 +356,8 @@ def webScrapper():
                         "URLs": urls,
                         "Images": images,
                         "Descriptions": descriptions,
-                        "Specifications": specifications
+                        "Specifications": specifications,
+                        "Variations": variations
                     }
                 }, ensure_ascii=False),
                 content_type='application/json; charset=utf-8'
