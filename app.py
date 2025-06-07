@@ -270,7 +270,7 @@ def webScrapper():
             variations = []
 
             # Si es una página de listado
-            if 'listado.mercadolibre.com' in url:
+            if 'listado.mercadolibre.com.co' in url:
                 products_page = soup.find_all('li', class_='ui-search-layout__item')
 
                 for index, product in enumerate(products_page):
